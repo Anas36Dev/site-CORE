@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE `partnerserver` ADD COLUMN `discordUrl` VARCHAR(191) NULL,
+ALTER TABLE `PartnerServer` ADD COLUMN `discordUrl` VARCHAR(191) NULL,
     ADD COLUMN `fivemUrl` VARCHAR(191) NULL,
     ADD COLUMN `founders` VARCHAR(191) NULL,
     ADD COLUMN `isClosed` BOOLEAN NOT NULL DEFAULT false,

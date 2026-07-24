@@ -5,20 +5,20 @@
 
 */
 -- DropForeignKey
-ALTER TABLE `_memberprojects` DROP FOREIGN KEY `_MemberProjects_A_fkey`;
+ALTER TABLE `_MemberProjects` DROP FOREIGN KEY `_MemberProjects_A_fkey`;
 
 -- DropForeignKey
-ALTER TABLE `_memberprojects` DROP FOREIGN KEY `_MemberProjects_B_fkey`;
+ALTER TABLE `_MemberProjects` DROP FOREIGN KEY `_MemberProjects_B_fkey`;
 
 -- AlterTable
-ALTER TABLE `member` ADD COLUMN `discordGlobalName` VARCHAR(191) NULL,
+ALTER TABLE `Member` ADD COLUMN `discordGlobalName` VARCHAR(191) NULL,
     ADD COLUMN `discordUsername` VARCHAR(191) NULL;
 
 -- AlterTable
-ALTER TABLE `project` ADD COLUMN `serverLogoUrl` VARCHAR(191) NULL;
+ALTER TABLE `Project` ADD COLUMN `serverLogoUrl` VARCHAR(191) NULL;
 
 -- DropTable
-DROP TABLE `_memberprojects`;
+DROP TABLE `_MemberProjects`;
 
 -- CreateTable
 CREATE TABLE `Participation` (
