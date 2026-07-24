@@ -10,13 +10,12 @@ import {
   isDiscordConfigured,
 } from "@/lib/discord";
 import { PERMISSIONS } from "@/lib/permissions";
+import { siteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
 function refuse(req: NextRequest, reason: string) {
-  return NextResponse.redirect(
-    new URL(`/connexion-refusee?reason=${reason}`, req.url),
-  );
+  return NextResponse.redirect(siteUrl(req, `/connexion-refusee?reason=${reason}`));
 }
 
 export async function GET(req: NextRequest) {
@@ -90,5 +89,5 @@ export async function GET(req: NextRequest) {
   await db.member.update({ where: { id: member.id }, data });
 
   await createSession(member.id);
-  return NextResponse.redirect(new URL("/", req.url));
+  return NextResponse.redirect(siteUrl(req, "/"));
 }

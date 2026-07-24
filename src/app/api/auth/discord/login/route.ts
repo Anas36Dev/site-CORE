@@ -3,13 +3,14 @@ import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
 
 import { buildAuthorizeUrl, isDiscordConfigured } from "@/lib/discord";
+import { siteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   if (!isDiscordConfigured()) {
     return NextResponse.redirect(
-      new URL("/connexion-refusee?reason=config", req.url),
+      siteUrl(req, "/connexion-refusee?reason=config"),
     );
   }
 
