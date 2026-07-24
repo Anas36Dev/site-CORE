@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "DATABASE_URL=\"${DATABASE_URL:-mysql://build:build@localhost:3306/build}\" prisma generate && DATABASE_URL=\"${DATABASE_URL:-mysql://build:build@localhost:3306/build}\" next build",
     "start": "next start",
     "lint": "eslint"
   },
