@@ -4,7 +4,13 @@ import { destroySession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
+/** Déconnecte et renvoie toujours vers l'accueil. */
+async function logout(req: NextRequest) {
   await destroySession();
   return NextResponse.redirect(new URL("/", req.url), { status: 303 });
 }
+
+// Le bouton de déconnexion envoie un POST ; on gère aussi le GET (lien direct)
+// pour ne jamais aboutir sur une page vide.
+export const POST = logout;
+export const GET = logout;
