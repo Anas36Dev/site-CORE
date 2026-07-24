@@ -1,0 +1,244 @@
+// CORE France Project — schéma de base de données
+// SGBD : MySQL (XAMPP en local) / MariaDB (prod). Base : `core_site`.
+// ⚠️ Base strictement séparée du MDT.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// Prisma 7 : l'URL de connexion vit dans prisma.config.ts (migrations)
+// et dans l'adapter passé à PrismaClient (runtime), pas ici.
+datasource db {
+  provider = "mysql"
+}
+
+// ---------------------------------------------------------------------------
+// ÉNUMÉRATIONS
+// ---------------------------------------------------------------------------
+
+enum Orientation {
+  POLICE
+  GOUVERNEMENT
+  JUSTICE
+  ILLEGAL
+  AUCUNE
+}
+
+/// Tier d'appartenance (affiché sur l'annuaire).
+enum MemberRole {
+  FONDATEUR
+  MEMBRE
+}
+
+/// Activité (un Vétéran a quitté le projet).
+enum MemberStatus {
+  ACTIF
+  VETERAN
+}
+
+enum ProjectCategory {
+  LEGAL
+  ILLEGAL
+}
+
+enum RealisationCategory {
+  AFFICHE
+  LOGO
+  DOCUMENT
+  FORMULAIRE
+  DOSSIER
+  SITE_EXTERNE
+}
+
+// ---------------------------------------------------------------------------
+// MEMBRES
+// ---------------------------------------------------------------------------
+
+/// Fiche d'un membre de CORE. Créée / éditée / supprimée par un Fondateur
+/// disposant de la permission GESTION_MEMBRES.
+model Member {
+  id          Int          @id @default(autoincrement())
+  /// Identifiant d'URL lisible : /membres/<slug>
+  slug        String       @unique
+  pseudo      String
+  /// Photo définie manuellement (chemin /images/membres/... ou URL). Prioritaire.
+  avatarUrl   String?
+  /// Photo Discord récupérée automatiquement à la connexion (fallback).
+  discordAvatarUrl String?
+  orientation Orientation  @default(AUCUNE)
+  role        MemberRole   @default(MEMBRE)
+  status      MemberStatus @default(ACTIF)
+  /// Afficher dans l'annuaire « Nos membres » ? (false = équipe uniquement, ex. staff design/technique)
+  inDirectory Boolean      @default(true)
+  /// Libellé libre affiché sous le pseudo (ex. « Père Fondateur », « Lead illégal »,
+  /// « Sys.Admin », « Développeur FiveM »).
+  title       String?
+  /// Sections de la page « Notre équipe » auxquelles le membre appartient
+  /// (JSON : tableau parmi FONDATEURS | DEVS | DESIGNERS | DOYENS). Une même
+  /// personne peut figurer dans plusieurs sections.
+  groups      Json         @default("[]")
+  /// Date d'arrivée dans le projet (certaines fiches ont une date précise).
+  joinedAt    DateTime?
+  description String?      @db.Text
+
+  /// Discord ID rattaché : seule clé de connexion. Null = ne peut pas se connecter.
+  discordId String? @unique
+  /// Nom d'utilisateur Discord (handle, ex. « anas36 »).
+  discordUsername String?
+  /// Nom d'affichage Discord (ex. « Anas »).
+  discordGlobalName String?
+
+  /// Permissions back-office (liste de codes). MySQL ne gère pas les tableaux
+  /// scalaires : on stocke un tableau JSON de chaînes validées côté application.
+  /// Codes : GESTION_MEMBRES | GESTION_PROJETS | GESTION_REALISATIONS |
+  ///         GESTION_CONTENU | GESTION_PERMISSIONS
+  permissions Json @default("[]")
+
+  /// Liens perso optionnels (JSON : { discord?, tiktok?, twitter?, ... }).
+  links Json @default("{}")
+
+  /// Participations aux projets (avec grade éventuel).
+  participations Participation[]
+
+  sessions Session[]
+
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// SESSIONS (auth en base — révocation immédiate)
+// ---------------------------------------------------------------------------
+
+model Session {
+  id        String   @id
+  memberId  Int
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([memberId])
+}
+
+// ---------------------------------------------------------------------------
+// PROJETS (légaux & illégaux)
+// ---------------------------------------------------------------------------
+
+model Project {
+  id          Int             @id @default(autoincrement())
+  /// Nom du serveur / support du projet (ex. iFive, Anesya).
+  name        String
+  year        Int
+  /// Durée libre (ex. « 5 mois », « 2 semaines »).
+  duration    String?
+  category    ProjectCategory
+  /// Structures / organisations jouées (JSON : tableau de chaînes).
+  structures  Json            @default("[]")
+  /// Logo de la structure / du projet.
+  logoUrl     String?
+  /// Logo du serveur hôte (ex. logo d'Anesya).
+  serverLogoUrl String?
+  description String?         @db.Text
+
+  participations Participation[]
+
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([year])
+}
+
+// ---------------------------------------------------------------------------
+// PARTICIPATIONS (membre ↔ projet, avec grade)
+// ---------------------------------------------------------------------------
+
+model Participation {
+  id        Int     @id @default(autoincrement())
+  memberId  Int
+  projectId Int
+  /// Structure interne au projet (ex. « Blaine County Sheriff Office », « SASP »).
+  /// "" = projet sans structure distincte. Chaque structure a ses propres membres/grades.
+  structure String  @default("")
+  /// Grade tenu dans cette structure (ex. « Sheriff », « Chief », « Deputy »).
+  grade     String?
+  order     Int     @default(0)
+
+  member  Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, projectId, structure])
+  @@index([memberId])
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// SERVEURS HÔTES (« qui nous ont accueillis »)
+// ---------------------------------------------------------------------------
+
+model PartnerServer {
+  id           Int      @id @default(autoincrement())
+  /// Identifiant d'URL : /serveurs/<slug>
+  slug         String?
+  name         String
+  logoUrl      String?
+  /// Fondateur(s) du serveur (texte libre).
+  founders     String?
+  /// Tranche de joueurs journaliers (ex. « 50-100 joueurs/jour »).
+  playersRange String?
+  discordUrl   String?
+  fivemUrl     String?
+  /// Serveur fermé / n'existe plus → bandeau rouge, pas de redirection FiveM.
+  isClosed     Boolean  @default(false)
+  order        Int      @default(0)
+}
+
+// ---------------------------------------------------------------------------
+// RÉALISATIONS (portfolio)
+// ---------------------------------------------------------------------------
+
+model Realisation {
+  id          Int                 @id @default(autoincrement())
+  title       String
+  category    RealisationCategory
+  imageUrl    String?
+  author      String?
+  description String?             @db.Text
+  /// Pour la catégorie SITE_EXTERNE : lien du site.
+  externalUrl String?
+
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+// ---------------------------------------------------------------------------
+// GALERIE (page d'accueil)
+// ---------------------------------------------------------------------------
+
+model GalleryImage {
+  id       Int     @id @default(autoincrement())
+  imageUrl String
+  caption  String?
+  order    Int     @default(0)
+}
+
+// ---------------------------------------------------------------------------
+// CONTENU ÉDITABLE (pages : intro accueil, « Qui sommes-nous », footer…)
+// ---------------------------------------------------------------------------
+
+model Content {
+  /// Clé stable (ex. "home.intro", "about.body", "footer.legal").
+  key   String @id
+  value Json   @default("{}")
+
+  updatedAt DateTime @updatedAt
+}

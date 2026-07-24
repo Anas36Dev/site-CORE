@@ -1,0 +1,25 @@
+# Dépendances et artefacts de build (réinstallés/regénérés dans l'image)
+node_modules
+.next
+out
+
+# Git & éditeurs
+.git
+.gitignore
+.vscode
+.idea
+
+# Secrets et env local (injectés au runtime par docker compose)
+.env
+.env.*
+!.env.docker.example
+
+# Docker : on garde docker-entrypoint.sh (copié explicitement par le Dockerfile).
+.dockerignore
+docker-compose.yml
+
+# Divers
+*.log
+npm-debug.log*
+README.md
+DOCKER.md

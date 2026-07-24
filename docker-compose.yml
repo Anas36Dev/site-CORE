@@ -1,0 +1,63 @@
+# =============================================================================
+# CORE France Project — orchestration complète : base MariaDB + application Next.
+#
+#   docker compose up -d --build      # build + démarrage
+#   docker compose logs -f app        # suivre les logs de l'app
+#   docker compose down               # arrêt (les données/volumes sont conservés)
+#
+# ⚠ Base de données DISTINCTE du MDT (base « core_site »). Déploiement séparé.
+#
+# Variables surchargeables via un fichier .env (à côté de ce compose) :
+#   DB_PASSWORD, DB_NAME, APP_PORT, APP_URL, SEED_ON_START, NEXT_PUBLIC_*
+# Les secrets Discord sont lus depuis le même .env (env_file ci-dessous).
+# =============================================================================
+
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-core_root}
+      MARIADB_DATABASE: ${DB_NAME:-core_site}
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Variables publiques figées au build (voir Dockerfile). Renseignées via
+      # le .env local ; laissées vides, le code applique ses valeurs par défaut.
+      args:
+        NEXT_PUBLIC_MDT_URL: ${NEXT_PUBLIC_MDT_URL:-}
+        NEXT_PUBLIC_FIVEM_CONNECT_URL: ${NEXT_PUBLIC_FIVEM_CONNECT_URL:-}
+        NEXT_PUBLIC_TIKTOK_URL: ${NEXT_PUBLIC_TIKTOK_URL:-}
+        NEXT_PUBLIC_DISCORD_URL: ${NEXT_PUBLIC_DISCORD_URL:-}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # Reprend le .env local (secrets Discord, bootstrap admin, etc.). Les
+    # variables ci-dessous ont la priorité et branchent l'app sur le service `db`.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: mysql://root:${DB_PASSWORD:-core_root}@db:3306/${DB_NAME:-core_site}
+      APP_URL: ${APP_URL:-http://localhost:3001}
+      SEED_ON_START: ${SEED_ON_START:-true}
+      NODE_ENV: production
+    ports:
+      - "${APP_PORT:-3001}:3000"
+
+volumes:
+  db-data:

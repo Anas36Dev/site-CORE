@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE `partnerserver` ADD COLUMN `discordUrl` VARCHAR(191) NULL,
+    ADD COLUMN `fivemUrl` VARCHAR(191) NULL,
+    ADD COLUMN `founders` VARCHAR(191) NULL,
+    ADD COLUMN `isClosed` BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN `playersRange` VARCHAR(191) NULL,
+    ADD COLUMN `slug` VARCHAR(191) NULL;

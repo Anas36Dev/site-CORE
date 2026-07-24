@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/*
+ * Thème « agence fédérale » de CORE France Project.
+ * Bleu nuit profond, acier, or de commandement (anneau du logo) et rouge d'alerte.
+ * Reprend l'ADN CSS du MDT (tokens @theme, panel, label-tag) adapté à la charte CORE.
+ */
+@theme {
+  /* Fonds — bleu nuit */
+  --color-navy-950: #05070e;
+  --color-navy-900: #090d1a;
+  --color-navy-850: #0d1322;
+  --color-navy-800: #121a2d;
+  --color-navy-700: #1a2540;
+  --color-navy-600: #273458;
+  --color-navy-500: #38486e;
+
+  /* Texte — acier */
+  --color-steel-500: #6c7a95;
+  --color-steel-300: #9aa8c2;
+  --color-steel-100: #dbe3f2;
+
+  /* Bleu fédéral (drapeau du logo) */
+  --color-federal-600: #163d82;
+  --color-federal-500: #1e56b8;
+  --color-federal-400: #3f7ce0;
+  --color-federal-300: #7dabf5;
+
+  /* Or de commandement (anneau du logo) */
+  --color-gold-600: #a8842f;
+  --color-gold-500: #cba14a;
+  --color-gold-400: #e6c574;
+
+  /* Rouge (drapeau du logo) */
+  --color-crimson-600: #8f2622;
+  --color-crimson-500: #c3352c;
+  --color-crimson-400: #e05a4f;
+
+  /* États */
+  --color-warn-500: #d98c26;
+  --color-ok-500: #2f9e63;
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-navy-950);
+  color: var(--color-steel-100);
+  font-family: var(--font-sans);
+  /* Lueur dorée en tête + trame diagonale discrète, façon dossier officiel. */
+  background-image:
+    radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgb(203 161 74 / 0.10),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 100% 0%,
+      rgb(30 86 184 / 0.10),
+      transparent
+    ),
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 22px,
+      rgb(255 255 255 / 0.012) 22px 23px
+    );
+  background-attachment: fixed;
+}
+
+/* Barres de défilement assorties au thème */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-navy-600) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-navy-600);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-navy-500);
+}
+
+/* Anneau de focus homogène et accessible */
+:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+}
+
+/* Tailwind v4 ne met plus cursor:pointer sur les boutons — on le rétablit. */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Surface encadrée standard */
+@utility panel {
+  background-color: color-mix(in oklab, var(--color-navy-900) 88%, transparent);
+  border: 1px solid var(--color-navy-700);
+  border-radius: 0.75rem;
+}
+
+/* Petit intitulé en capitales espacées */
+@utility label-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--color-steel-500);
+}
+
+/* Liseré doré discret, rappel de l'anneau du logo */
+@utility gold-hairline {
+  border: 1px solid color-mix(in oklab, var(--color-gold-500) 45%, transparent);
+}

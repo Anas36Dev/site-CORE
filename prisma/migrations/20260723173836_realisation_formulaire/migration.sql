@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `realisation` MODIFY `category` ENUM('AFFICHE', 'LOGO', 'DOCUMENT', 'FORMULAIRE', 'DOSSIER', 'SITE_EXTERNE') NOT NULL;

@@ -1,0 +1,6 @@
+# Normalisation des fins de ligne.
+* text=auto
+
+# Scripts shell exécutés dans le conteneur Linux : toujours en LF.
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
