@@ -90,5 +90,5 @@ export async function GET(req: NextRequest) {
   await db.member.update({ where: { id: member.id }, data });
 
   await createSession(member.id);
-  return NextResponse.redirect(new URL("/mon-compte", req.url));
+  return NextResponse.redirect(new URL("/", req.url));
 }
