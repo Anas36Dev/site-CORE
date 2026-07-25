@@ -33,4 +33,8 @@ next-env.d.ts
 # prisma generated client
 /src/generated
 
-core_site.sql
+# Dumps SQL (données perso : pseudos, Discord IDs) — jamais sur le repo public
+*.sql
+# …sauf le DDL versionné (aucune donnée) : scripts utilitaires + migrations Prisma
+!scripts/*.sql
+!prisma/migrations/**/*.sql
