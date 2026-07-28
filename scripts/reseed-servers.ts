@@ -12,17 +12,26 @@ const db = new PrismaClient({
 });
 
 async function main() {
-  await db.partnerServer.deleteMany();
   const used = new Set<string>();
-  await db.partnerServer.createMany({
-    data: SERVERS.map((s, i) => {
-      let slug = slugify(s.name);
-      let k = 2;
-      while (used.has(slug)) slug = `${slugify(s.name)}-${k++}`;
-      used.add(slug);
-      return { name: s.name, slug, logoUrl: s.logo ?? null, order: i };
-    }),
-  });
+  for (const s of SERVERS) {
+    let slug = s.slug ?? slugify(s.name);
+    let k = 2;
+    while (used.has(slug)) slug = `${s.slug ?? slugify(s.name)}-${k++}`;
+    used.add(slug);
+    const data = {
+      name: s.name,
+      logoUrl: s.logoUrl,
+      founders: s.founders,
+      playersRange: s.playersRange,
+      discordUrl: s.discordUrl,
+      fivemUrl: s.fivemUrl,
+      isClosed: s.isClosed,
+      order: s.order,
+    };
+    const existing = await db.partnerServer.findFirst({ where: { slug } });
+    if (existing) await db.partnerServer.update({ where: { id: existing.id }, data });
+    else await db.partnerServer.create({ data: { slug, ...data } });
+  }
   const withLogo = await db.partnerServer.count({ where: { logoUrl: { not: null } } });
   const total = await db.partnerServer.count();
   console.log(`Serveurs ré-appliqués : ${total} (dont ${withLogo} avec logo).`);

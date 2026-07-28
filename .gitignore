@@ -35,6 +35,7 @@ next-env.d.ts
 
 # Dumps SQL (données perso : pseudos, Discord IDs) — jamais sur le repo public
 *.sql
+backup_site_vitrine_28-07-2026.sql
 # …sauf le DDL versionné (aucune donnée) : scripts utilitaires + migrations Prisma
 !scripts/*.sql
 !prisma/migrations/**/*.sql
