@@ -57,6 +57,9 @@ export const REALISATIONS: RealRow[] = [
   { title: "Dossier — San Andreas Government (IRS, DoJ, USSS, State Senate)", category: "DOSSIER", author: "anas36", externalUrl: "https://docs.google.com/presentation/d/1tNE5hsNXQSQc98xIKYtRTP2zwFd78w_bs0QqMPkgILA/present" },
 
   // ── Sites externes ────────────────────────────────────────────────────
-  { title: "San Andreas Government", category: "SITE_EXTERNE", externalUrl: "https://sites.google.com/view/anas36-gov" },
+  { title: "CORE France Project", category: "SITE_EXTERNE", externalUrl: "https://core-franceproject.fr/" },
+  { title: "Los Santos Police Department (MDT)", category: "SITE_EXTERNE", externalUrl: "https://lspd.core-franceproject.fr/" },
+  { title: "San Andreas Government", category: "SITE_EXTERNE", externalUrl: "http://gov.core-franceproject.fr/" },
   { title: "Federal Investigation Bureau", category: "SITE_EXTERNE", externalUrl: "https://sites.google.com/view/anas36-fib" },
+  { title: "Map interactive de GTA V", category: "SITE_EXTERNE", externalUrl: "http://map.core-franceproject.fr/" },
 ];
